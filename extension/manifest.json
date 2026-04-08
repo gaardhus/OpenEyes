@@ -4,12 +4,7 @@
   "version": "0.2.0",
   "description": "Select any page element and send it to a running OpenCode session.",
 
-  "permissions": [
-    "activeTab",
-    "tabs",
-    "<all_urls>",
-    "storage"
-  ],
+  "permissions": ["activeTab", "tabs", "<all_urls>", "storage"],
 
   "background": {
     "scripts": ["background.js"]
@@ -23,5 +18,14 @@
     "default_popup": "popup.html"
   },
 
-  "content_security_policy": "script-src 'self'; object-src 'self'"
+  "content_security_policy": "script-src 'self'; object-src 'self'",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "openeyes@your-domain.com",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  }
 }

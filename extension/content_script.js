@@ -188,9 +188,7 @@ function showOverlay(el, info, screenshotBase64) {
 
       .panel {
         position: fixed;
-        left: ${px}px;
-        top: ${py}px;
-        width: ${panelW}px;
+        width: 330px;
         background: #1e1e2e;
         border: 1px solid #4f8ef7;
         border-radius: 10px;
@@ -333,19 +331,19 @@ function showOverlay(el, info, screenshotBase64) {
     <div class="panel" id="panel">
       <div class="header">
         <span class="dot"></span>
-        <span class="tag" title="${escapeAttr(info.cssSelector)}">${escapeHtml(labelText)}</span>
-        <button class="close-btn" id="close" title="Cancel (Esc)">×</button>
+        <span class="tag" id="tag-label"></span>
+        <button class="close-btn" id="close" title="Cancel (Esc)">&#xD7;</button>
       </div>
       <hr>
       <label for="instruction">Instruction</label>
-      <textarea id="instruction" placeholder="e.g. Summarise this, fix the bug, explain…" rows="3"></textarea>
-      <div class="hint">Ctrl+Enter to send · Esc to cancel</div>
+      <textarea id="instruction" placeholder="e.g. Summarise this, fix the bug, explain&#x2026;" rows="3"></textarea>
+      <div class="hint">Ctrl+Enter to send &#xB7; Esc to cancel</div>
       <div class="toggles">
-        <button class="toggle${includeHtml ? " active" : ""}" id="tog-html">
-          <span class="toggle-icon">⌥</span> Source
+        <button class="toggle" id="tog-html">
+          <span class="toggle-icon">&#x2325;</span> Source
         </button>
-        <button class="toggle${includeShot ? " active" : ""}" id="tog-shot"${screenshotBase64 ? "" : " disabled"}>
-          <span class="toggle-icon">◈</span> Screenshot
+        <button class="toggle" id="tog-shot">
+          <span class="toggle-icon">&#x25C8;</span> Screenshot
         </button>
       </div>
       <div class="actions">
@@ -355,6 +353,15 @@ function showOverlay(el, info, screenshotBase64) {
       <div class="status" id="status"></div>
     </div>
   `;
+
+  // Apply dynamic values via DOM APIs (avoids unsafe innerHTML interpolation)
+  const panel = shadowRoot.getElementById("panel");
+  panel.style.left = px + "px";
+  panel.style.top = py + "px";
+
+  const tagLabel = shadowRoot.getElementById("tag-label");
+  tagLabel.textContent = labelText;
+  tagLabel.title = info.cssSelector;
 
   const textarea = shadowRoot.getElementById("instruction");
   const sendBtn = shadowRoot.getElementById("send");
@@ -383,9 +390,13 @@ function showOverlay(el, info, screenshotBase64) {
 
   sendBtn.addEventListener("click", doSend);
 
-  // Toggles
+  // Toggles — set initial state via DOM
   const togHtml = shadowRoot.getElementById("tog-html");
   const togShot = shadowRoot.getElementById("tog-shot");
+
+  togHtml.classList.toggle("active", includeHtml);
+  togShot.classList.toggle("active", includeShot);
+  if (!screenshotBase64) togShot.disabled = true;
 
   togHtml.addEventListener("click", () => {
     includeHtml = !includeHtml;
