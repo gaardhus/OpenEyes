@@ -24,6 +24,15 @@ build-chrome:
 [group("build")]
 build-all: build-firefox build-chrome
 
+# Regenerate Chrome extension PNG icons from SVG
+[group("assets")]
+icons-chrome:
+    magick -background none "{{ ext_firefox_dir }}/icons/icon.svg" -resize 16x16 "{{ ext_chrome_dir }}/icons/icon-16.png"
+    magick -background none "{{ ext_firefox_dir }}/icons/icon.svg" -resize 32x32 "{{ ext_chrome_dir }}/icons/icon-32.png"
+    magick -background none "{{ ext_firefox_dir }}/icons/icon.svg" -resize 48x48 "{{ ext_chrome_dir }}/icons/icon-48.png"
+    magick -background none "{{ ext_firefox_dir }}/icons/icon.svg" -resize 128x128 "{{ ext_chrome_dir }}/icons/icon-128.png"
+    cp "{{ ext_chrome_dir }}/icons/icon-128.png" "assets/"
+
 # Run the extension in Firefox for development (requires web-ext)
 [group("Firefox")]
 run:
