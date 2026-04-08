@@ -16,6 +16,8 @@ It's designed to bridge the gap between your browser and your development enviro
 
 ## Installation
 
+TBD
+
 ### For Developers
 
 1.  **Clone the repository:**
@@ -36,7 +38,7 @@ It's designed to bridge the gap between your browser and your development enviro
 3.  **Run in Development Mode:**
     This will launch Firefox with the extension loaded.
     ```bash
-    just run
+    just dev
     ```
 
 ### Manual Installation (Firefox/Chrome)
@@ -44,7 +46,7 @@ It's designed to bridge the gap between your browser and your development enviro
 1.  Open your browser's extension management page (`about:debugging` in Firefox, `chrome://extensions` in Chrome).
 2.  Enable "Developer mode" if required.
 3.  Click "Load Temporary Add-on" (Firefox) or "Load unpacked" (Chrome).
-4.  Select the `extension/` directory in this project.
+4.  Select the relevant extension directory in this project.
 
 ## Usage
 
