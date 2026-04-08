@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 // Guard against double-injection
 if (window.__openeyes_loaded) {
@@ -19,33 +19,33 @@ let shadowRoot = null;
 let includeHtml = true;
 let includeShot = true;
 
-const HIGHLIGHT_STYLE = '2px solid #4f8ef7';
-const SELECTED_STYLE = '2px solid #a6e3a1';
+const HIGHLIGHT_STYLE = "2px solid #4f8ef7";
+const SELECTED_STYLE = "2px solid #a6e3a1";
 
 // ─── Picker ───────────────────────────────────────────────────────────────────
 
 function activatePicker() {
   if (pickerActive) return;
   pickerActive = true;
-  document.body.style.cursor = 'crosshair';
-  document.addEventListener('mouseover', onHover, true);
-  document.addEventListener('mouseout', onUnhover, true);
-  document.addEventListener('click', onSelect, true);
-  document.addEventListener('keydown', onKey, true);
+  document.body.style.cursor = "crosshair";
+  document.addEventListener("mouseover", onHover, true);
+  document.addEventListener("mouseout", onUnhover, true);
+  document.addEventListener("click", onSelect, true);
+  document.addEventListener("keydown", onKey, true);
 }
 
 function deactivatePicker() {
   if (!pickerActive) return;
   pickerActive = false;
-  document.body.style.cursor = '';
-  document.removeEventListener('mouseover', onHover, true);
-  document.removeEventListener('mouseout', onUnhover, true);
-  document.removeEventListener('click', onSelect, true);
-  document.removeEventListener('keydown', onKey, true);
+  document.body.style.cursor = "";
+  document.removeEventListener("mouseover", onHover, true);
+  document.removeEventListener("mouseout", onUnhover, true);
+  document.removeEventListener("click", onSelect, true);
+  document.removeEventListener("keydown", onKey, true);
 
   if (hoveredEl && hoveredEl !== selectedEl) {
-    hoveredEl.style.outline = '';
-    hoveredEl.style.outlineOffset = '';
+    hoveredEl.style.outline = "";
+    hoveredEl.style.outlineOffset = "";
   }
   hoveredEl = null;
 }
@@ -55,19 +55,20 @@ function onHover(e) {
   if (el === overlayContainer || overlayContainer?.contains(el)) return;
 
   if (hoveredEl && hoveredEl !== selectedEl) {
-    hoveredEl.style.outline = '';
-    hoveredEl.style.outlineOffset = '';
+    hoveredEl.style.outline = "";
+    hoveredEl.style.outlineOffset = "";
   }
   hoveredEl = el;
   el.style.outline = HIGHLIGHT_STYLE;
-  el.style.outlineOffset = '-2px';
+  el.style.outlineOffset = "-2px";
+  el.style.zIndex = "4444";
 }
 
 function onUnhover(e) {
   const el = e.target;
   if (el === hoveredEl && el !== selectedEl) {
-    el.style.outline = '';
-    el.style.outlineOffset = '';
+    el.style.outline = "";
+    el.style.outlineOffset = "";
     hoveredEl = null;
   }
 }
@@ -83,19 +84,20 @@ function onSelect(e) {
 
   // Clear previous selection highlight
   if (selectedEl) {
-    selectedEl.style.outline = '';
-    selectedEl.style.outlineOffset = '';
+    selectedEl.style.outline = "";
+    selectedEl.style.outlineOffset = "";
   }
 
   selectedEl = el;
   el.style.outline = SELECTED_STYLE;
-  el.style.outlineOffset = '-2px';
+  el.style.outlineOffset = "-2px";
+  el.style.zIndex = "4444";
 
   captureAndShow(el);
 }
 
 function onKey(e) {
-  if (e.key === 'Escape') {
+  if (e.key === "Escape") {
     deactivatePicker();
     closeOverlay();
   }
@@ -111,7 +113,12 @@ function getElementInfo(el) {
     outerHTML: el.outerHTML,
     url: window.location.href,
     title: document.title,
-    rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+    rect: {
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
+    },
     devicePixelRatio: window.devicePixelRatio || 1,
   };
 }
@@ -119,7 +126,11 @@ function getElementInfo(el) {
 function buildSelector(el) {
   const parts = [];
   let current = el;
-  while (current && current.nodeType === Node.ELEMENT_NODE && current !== document.documentElement) {
+  while (
+    current &&
+    current.nodeType === Node.ELEMENT_NODE &&
+    current !== document.documentElement
+  ) {
     let part = current.nodeName.toLowerCase();
     if (current.id) {
       part += `#${CSS.escape(current.id)}`;
@@ -127,7 +138,9 @@ function buildSelector(el) {
       break;
     }
     const siblings = current.parentNode
-      ? [...current.parentNode.children].filter(c => c.nodeName === current.nodeName)
+      ? [...current.parentNode.children].filter(
+          (c) => c.nodeName === current.nodeName,
+        )
       : [];
     if (siblings.length > 1) {
       part += `:nth-of-type(${siblings.indexOf(current) + 1})`;
@@ -135,7 +148,7 @@ function buildSelector(el) {
     parts.unshift(part);
     current = current.parentNode;
   }
-  return parts.join(' > ');
+  return parts.join(" > ");
 }
 
 // ─── Screenshot + overlay ─────────────────────────────────────────────────────
@@ -147,7 +160,7 @@ async function captureAndShow(el) {
   let screenshotBase64 = null;
   try {
     const resp = await browser.runtime.sendMessage({
-      type: 'CAPTURE_SCREENSHOT',
+      type: "CAPTURE_SCREENSHOT",
       rect: info.rect,
       devicePixelRatio: info.devicePixelRatio,
     });
@@ -162,13 +175,14 @@ async function captureAndShow(el) {
 function showOverlay(el, info, screenshotBase64) {
   closeOverlay(); // remove any existing overlay
 
-  overlayContainer = document.createElement('div');
-  overlayContainer.id = '__openeyes_root__';
+  overlayContainer = document.createElement("div");
+  overlayContainer.id = "__openeyes_root__";
   // Fixed-position zero-size host so it doesn't affect layout
-  overlayContainer.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;z-index:2147483647;';
+  overlayContainer.style.cssText =
+    "position:fixed;top:0;left:0;width:0;height:0;z-index:2147483647;";
   document.documentElement.appendChild(overlayContainer);
 
-  shadowRoot = overlayContainer.attachShadow({ mode: 'open' });
+  shadowRoot = overlayContainer.attachShadow({ mode: "open" });
 
   // Position panel near the element, keeping it on-screen
   const { top, left, width, height } = info.rect;
@@ -344,10 +358,10 @@ function showOverlay(el, info, screenshotBase64) {
       <textarea id="instruction" placeholder="e.g. Summarise this, fix the bug, explain…" rows="3"></textarea>
       <div class="hint">Ctrl+Enter to send · Esc to cancel</div>
       <div class="toggles">
-        <button class="toggle${includeHtml ? ' active' : ''}" id="tog-html">
+        <button class="toggle${includeHtml ? " active" : ""}" id="tog-html">
           <span class="toggle-icon">⌥</span> Source
         </button>
-        <button class="toggle${includeShot ? ' active' : ''}" id="tog-shot"${screenshotBase64 ? '' : ' disabled'}>
+        <button class="toggle${includeShot ? " active" : ""}" id="tog-shot"${screenshotBase64 ? "" : " disabled"}>
           <span class="toggle-icon">◈</span> Screenshot
         </button>
       </div>
@@ -359,40 +373,44 @@ function showOverlay(el, info, screenshotBase64) {
     </div>
   `;
 
-  const textarea = shadowRoot.getElementById('instruction');
-  const sendBtn  = shadowRoot.getElementById('send');
-  const status   = shadowRoot.getElementById('status');
+  const textarea = shadowRoot.getElementById("instruction");
+  const sendBtn = shadowRoot.getElementById("send");
+  const status = shadowRoot.getElementById("status");
 
-  shadowRoot.getElementById('close').addEventListener('click', () => {
+  shadowRoot.getElementById("close").addEventListener("click", () => {
     closeOverlay();
     clearSelection();
   });
-  shadowRoot.getElementById('cancel').addEventListener('click', () => {
+  shadowRoot.getElementById("cancel").addEventListener("click", () => {
     closeOverlay();
     clearSelection();
   });
 
-  textarea.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { closeOverlay(); clearSelection(); return; }
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+  textarea.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeOverlay();
+      clearSelection();
+      return;
+    }
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       doSend();
     }
   });
 
-  sendBtn.addEventListener('click', doSend);
+  sendBtn.addEventListener("click", doSend);
 
   // Toggles
-  const togHtml = shadowRoot.getElementById('tog-html');
-  const togShot = shadowRoot.getElementById('tog-shot');
+  const togHtml = shadowRoot.getElementById("tog-html");
+  const togShot = shadowRoot.getElementById("tog-shot");
 
-  togHtml.addEventListener('click', () => {
+  togHtml.addEventListener("click", () => {
     includeHtml = !includeHtml;
-    togHtml.classList.toggle('active', includeHtml);
+    togHtml.classList.toggle("active", includeHtml);
   });
-  togShot.addEventListener('click', () => {
+  togShot.addEventListener("click", () => {
     includeShot = !includeShot;
-    togShot.classList.toggle('active', includeShot);
+    togShot.classList.toggle("active", includeShot);
   });
 
   // Focus the textarea after a tick so the keydown Escape doesn't immediately close
@@ -406,7 +424,7 @@ function showOverlay(el, info, screenshotBase64) {
     }
 
     sendBtn.disabled = true;
-    setStatus('sending', 'Sending to OpenCode…');
+    setStatus("sending", "Sending to OpenCode…");
 
     const payload = {
       instruction,
@@ -414,16 +432,23 @@ function showOverlay(el, info, screenshotBase64) {
       url: info.url,
       title: info.title,
       cssSelector: info.cssSelector,
-      screenshotBase64: (includeShot && screenshotBase64) ? screenshotBase64 : null,
+      screenshotBase64:
+        includeShot && screenshotBase64 ? screenshotBase64 : null,
     };
 
-    const result = await browser.runtime.sendMessage({ type: 'SEND_TO_OPENCODE', payload });
+    const result = await browser.runtime.sendMessage({
+      type: "SEND_TO_OPENCODE",
+      payload,
+    });
 
     if (result?.ok) {
-      setStatus('success', 'Sent to OpenCode!');
-      setTimeout(() => { closeOverlay(); clearSelection(); }, 1800);
+      setStatus("success", "Sent to OpenCode!");
+      setTimeout(() => {
+        closeOverlay();
+        clearSelection();
+      }, 1800);
     } else {
-      setStatus('error', result?.error ?? 'Unknown error');
+      setStatus("error", result?.error ?? "Unknown error");
       sendBtn.disabled = false;
     }
   }
@@ -444,8 +469,8 @@ function closeOverlay() {
 
 function clearSelection() {
   if (selectedEl) {
-    selectedEl.style.outline = '';
-    selectedEl.style.outlineOffset = '';
+    selectedEl.style.outline = "";
+    selectedEl.style.outlineOffset = "";
     selectedEl = null;
   }
 }
@@ -453,21 +478,21 @@ function clearSelection() {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function truncate(str, max) {
-  return str.length > max ? '…' + str.slice(-(max - 1)) : str;
+  return str.length > max ? "…" + str.slice(-(max - 1)) : str;
 }
 
 function escapeHtml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function escapeAttr(str) {
-  return str.replace(/"/g, '&quot;');
+  return str.replace(/"/g, "&quot;");
 }
 
 // ─── Message listener ─────────────────────────────────────────────────────────
 
 browser.runtime.onMessage.addListener((message) => {
-  if (message.type === 'ACTIVATE_PICKER') {
+  if (message.type === "ACTIVATE_PICKER") {
     closeOverlay();
     clearSelection();
     activatePicker();
