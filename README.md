@@ -50,16 +50,26 @@ TBD
 
 ## Usage
 
-1.  **Start OpenCode:** Ensure your OpenCode server is running (usually on port `4096`).
-2.  **Configure:** Click the OpenEyes icon in your browser toolbar to set your Server URL and Auth Password (if applicable).
+1.  **Start OpenCode:** Ensure your OpenCode server is running with a specified port (i.e. `opencode --port 4096`).
+2.  **Configure:** Click the OpenEyes icon in your browser toolbar to set your Server URL and Auth Password (if applicable), and select a session (defaults to latest).
 3.  **Pick an Element:**
     - Click the **Pick Element** button in the popup.
     - Hover over the page to highlight elements.
     - Click to select an element.
 4.  **Send to OpenCode:**
     - Add an instruction (e.g., "Explain this component" or "Refactor this button").
-    - Toggle **Source** or **Screenshot** options.
+    - Toggle **Source** and/or **Screenshot** options.
     - Press **Send** or `Ctrl+Enter`.
+
+The relevant information is then send to the opencode session you selected, and you can continue the conversation in the terminal as usual.
+
+## Configuration
+
+Settings are persisted in local storage:
+
+- **Server URL:** The base URL of your OpenCode instance (default: `http://127.0.0.1:4096`).
+- **Session ID:** Which session to send messages to. "Auto" picks the most recently updated session.
+- **Auth Password:** Used for Basic Auth if your OpenCode instance requires it.
 
 ## Development Commands
 
@@ -70,14 +80,6 @@ The project includes a `justfile` for common tasks:
 - `just build`: Packages the extension into `dist/openeyes.zip`.
 - `just xpi`: Builds a signed or unsigned `.xpi` file for distribution.
 - `just clean`: Removes the `dist/` directory.
-
-## Configuration
-
-Settings are persisted in local storage:
-
-- **Server URL:** The base URL of your OpenCode instance (default: `http://127.0.0.1:4096`).
-- **Session ID:** Which session to send messages to. "Auto" picks the most recently updated session.
-- **Auth Password:** Used for Basic Auth if your OpenCode instance requires it.
 
 ## Other CLI tools
 
