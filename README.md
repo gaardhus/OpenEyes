@@ -71,6 +71,16 @@ Settings are persisted in local storage:
 - **Session ID:** Which session to send messages to. "Auto" picks the most recently updated session.
 - **Auth Password:** Used for Basic Auth if your OpenCode instance requires it.
 
+> [!TIP]
+> To automatically start the opencode cli with the port 4096, update your [ opencode configuration ](https://opencode.ai/docs/config/) with the following information:
+>
+> ```json
+> {
+>   "$schema": "https://opencode.ai/config.json",
+>   "server": { "port": 4096 }
+> }
+> ```
+
 ## Development Commands
 
 The project includes a `justfile` for common tasks:
