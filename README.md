@@ -1,5 +1,7 @@
 # OpenEyes
 
+<img src="firefox-extension/icons/icon.svg" alt="OpenEyes icon" width="96" />
+
 OpenEyes is a browser extension that allows you to select any element on a web page and send it—along with its HTML source and a cropped screenshot—directly to a running **OpenCode** session.
 
 It's designed to bridge the gap between your browser and your development environment, making it easy to share UI components, bug reports, or layout snippets with your AI-assisted coding tools.
@@ -17,6 +19,7 @@ It's designed to bridge the gap between your browser and your development enviro
 ### For Developers
 
 1.  **Clone the repository:**
+
     ```bash
     git clone https://github.com/your-username/openeyes.git
     cd openeyes
@@ -24,6 +27,7 @@ It's designed to bridge the gap between your browser and your development enviro
 
 2.  **Install dependencies:**
     The project uses `web-ext` for development and `just` as a command runner.
+
     ```bash
     # Ensure you have 'just' installed (https://just.systems/man/en/installation.html)
     # Ensure you have 'bun' or 'npm' for running web-ext
@@ -68,6 +72,7 @@ The project includes a `justfile` for common tasks:
 ## Configuration
 
 Settings are persisted in local storage:
+
 - **Server URL:** The base URL of your OpenCode instance (default: `http://127.0.0.1:4096`).
 - **Session ID:** Which session to send messages to. "Auto" picks the most recently updated session.
 - **Auth Password:** Used for Basic Auth if your OpenCode instance requires it.
