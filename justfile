@@ -35,7 +35,7 @@ icons-chrome:
 
 # Run the extension in Firefox for development (requires web-ext)
 [group("Firefox")]
-run:
+dev:
     bunx web-ext run --source-dir {{ ext_firefox_dir }}
 
 # Lint the extension (requires web-ext)
