@@ -79,6 +79,10 @@ Settings are persisted in local storage:
 - **Session ID:** Which session to send messages to. "Auto" picks the most recently updated session.
 - **Auth Password:** Used for Basic Auth if your OpenCode instance requires it.
 
+## Other CLI tools
+
+Currently I did not succeed in finding relevant entry points in either Claude Code or Codex ([relevant issue](https://github.com/openai/codex/issues/15299)). Alternatively we could enable sending one-off messages.
+
 ## License
 
 This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0) - see the [LICENSE](LICENSE) file for details.
