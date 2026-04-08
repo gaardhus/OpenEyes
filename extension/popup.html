@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenEyes</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 300px;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      font-family: system-ui, sans-serif;
+      font-size: 13px;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid #313244;
+    }
+    .logo { font-size: 18px; line-height: 1; }
+    .title { font-weight: 600; font-size: 14px; color: #cdd6f4; }
+    .version { font-size: 10px; color: #6c7086; margin-left: auto; }
+
+    /* ── Pick button ── */
+    .pick-section {
+      padding: 12px 14px;
+      border-bottom: 1px solid #313244;
+    }
+    .btn-pick {
+      width: 100%;
+      padding: 9px 0;
+      background: #4f8ef7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: system-ui, sans-serif;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+    }
+    .btn-pick:hover { background: #6ba3fa; }
+    .btn-pick:active { background: #3b7de8; }
+
+    /* ── Status bar ── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-bottom: 1px solid #313244;
+      font-size: 11px;
+      color: #6c7086;
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #45475a;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .status-dot.ok      { background: #a6e3a1; }
+    .status-dot.error   { background: #f38ba8; }
+    .status-dot.loading { background: #fab387; }
+    #status-text { flex: 1; }
+
+    /* ── Settings ── */
+    .settings {
+      padding: 10px 14px 14px;
+    }
+    .field {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #6c7086;
+      margin-bottom: 4px;
+    }
+    input, select {
+      width: 100%;
+      background: #181825;
+      border: 1px solid #313244;
+      border-radius: 5px;
+      color: #cdd6f4;
+      font-size: 12px;
+      font-family: system-ui, sans-serif;
+      padding: 5px 8px;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: #4f8ef7; }
+    select option { background: #181825; }
+
+    .session-row {
+      display: flex;
+      gap: 6px;
+    }
+    .session-row select { flex: 1; }
+    .btn-refresh {
+      background: #313244;
+      border: 1px solid #313244;
+      border-radius: 5px;
+      color: #cdd6f4;
+      cursor: pointer;
+      padding: 0 8px;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .btn-refresh:hover { background: #45475a; }
+
+    .btn-save {
+      width: 100%;
+      margin-top: 4px;
+      padding: 6px 0;
+      background: #313244;
+      color: #cdd6f4;
+      border: none;
+      border-radius: 5px;
+      font-size: 12px;
+      font-family: system-ui, sans-serif;
+      cursor: pointer;
+    }
+    .btn-save:hover { background: #45475a; }
+
+    .save-confirm {
+      text-align: center;
+      font-size: 10px;
+      color: #a6e3a1;
+      margin-top: 4px;
+      min-height: 14px;
+    }
+
+    details summary {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #6c7086;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 8px;
+      list-style: none;
+    }
+    details summary::after { content: ' ▸'; }
+    details[open] summary::after { content: ' ▾'; }
+    details[open] { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="logo">👁</span>
+    <span class="title">OpenEyes</span>
+    <span class="version">v0.2.0</span>
+  </div>
+
+  <div class="pick-section">
+    <button class="btn-pick" id="btn-pick">Pick Element</button>
+  </div>
+
+  <div class="status-bar">
+    <span class="status-dot" id="status-dot"></span>
+    <span id="status-text">Checking server…</span>
+  </div>
+
+  <div class="settings">
+    <div class="field">
+      <label for="server-url">Server URL</label>
+      <input type="text" id="server-url" value="http://127.0.0.1:4096" spellcheck="false">
+    </div>
+
+    <div class="field">
+      <label for="session-select">Session</label>
+      <div class="session-row">
+        <select id="session-select">
+          <option value="auto">Auto (most recent)</option>
+        </select>
+        <button class="btn-refresh" id="btn-refresh" title="Refresh sessions">⟳</button>
+      </div>
+    </div>
+
+    <details id="auth-details">
+      <summary>Auth</summary>
+      <div class="field">
+        <label for="auth-password">Password (OPENCODE_SERVER_PASSWORD)</label>
+        <input type="password" id="auth-password" placeholder="Leave blank if unset">
+      </div>
+    </details>
+
+    <button class="btn-save" id="btn-save">Save Settings</button>
+    <div class="save-confirm" id="save-confirm"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

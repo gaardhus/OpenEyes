@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "OpenEyes",
+  "version": "0.2.0",
+  "description": "Select any page element and send it to a running OpenCode session.",
+
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "<all_urls>",
+    "storage"
+  ],
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "browser_action": {
+    "default_icon": {
+      "48": "icons/icon.svg"
+    },
+    "default_title": "OpenEyes",
+    "default_popup": "popup.html"
+  },
+
+  "content_security_policy": "script-src 'self'; object-src 'self'"
+}
