@@ -14,13 +14,11 @@ let hoveredEl = null;
 let selectedEl = null;
 let overlayContainer = null;
 let shadowRoot = null;
+let highlightOverlay = null;
 
 // Persist toggle state across overlay opens within the same page session
 let includeHtml = true;
 let includeShot = true;
-
-const HIGHLIGHT_STYLE = "2px solid #4f8ef7";
-const SELECTED_STYLE = "2px solid #a6e3a1";
 
 // ─── Picker ───────────────────────────────────────────────────────────────────
 
@@ -43,33 +41,26 @@ function deactivatePicker() {
   document.removeEventListener("click", onSelect, true);
   document.removeEventListener("keydown", onKey, true);
 
-  if (hoveredEl && hoveredEl !== selectedEl) {
-    hoveredEl.style.outline = "";
-    hoveredEl.style.outlineOffset = "";
-  }
   hoveredEl = null;
+  // Keep any selected-element highlight; it will be cleared with clearSelection
 }
 
 function onHover(e) {
   const el = e.target;
   if (el === overlayContainer || overlayContainer?.contains(el)) return;
 
-  if (hoveredEl && hoveredEl !== selectedEl) {
-    hoveredEl.style.outline = "";
-    hoveredEl.style.outlineOffset = "";
-  }
   hoveredEl = el;
-  el.style.outline = HIGHLIGHT_STYLE;
-  el.style.outlineOffset = "-2px";
-  el.style.zIndex = "4444";
+  setHighlight(el, "hover");
 }
 
 function onUnhover(e) {
   const el = e.target;
-  if (el === hoveredEl && el !== selectedEl) {
-    el.style.outline = "";
-    el.style.outlineOffset = "";
-    hoveredEl = null;
+  if (el !== hoveredEl) return;
+  hoveredEl = null;
+  if (selectedEl) {
+    setHighlight(selectedEl, "selected");
+  } else {
+    clearHighlight();
   }
 }
 
@@ -82,16 +73,8 @@ function onSelect(e) {
 
   deactivatePicker();
 
-  // Clear previous selection highlight
-  if (selectedEl) {
-    selectedEl.style.outline = "";
-    selectedEl.style.outlineOffset = "";
-  }
-
   selectedEl = el;
-  el.style.outline = SELECTED_STYLE;
-  el.style.outlineOffset = "-2px";
-  el.style.zIndex = "4444";
+  setHighlight(el, "selected");
 
   captureAndShow(el);
 }
@@ -468,10 +451,38 @@ function closeOverlay() {
 }
 
 function clearSelection() {
-  if (selectedEl) {
-    selectedEl.style.outline = "";
-    selectedEl.style.outlineOffset = "";
-    selectedEl = null;
+  selectedEl = null;
+  clearHighlight();
+}
+
+// ─── Highlight overlay ────────────────────────────────────────────────────────
+
+function setHighlight(el, type) {
+  const rect = el.getBoundingClientRect();
+
+  if (!highlightOverlay) {
+    highlightOverlay = document.createElement("div");
+    highlightOverlay.style.cssText =
+      "position:fixed;pointer-events:none;z-index:2147483646;border-radius:1px;";
+    document.documentElement.appendChild(highlightOverlay);
+  }
+
+  const dimAlpha = type === "selected" ? "0.55" : "0.4";
+  const outlineColor = type === "selected" ? "#a6e3a1" : "#4f8ef7";
+
+  highlightOverlay.style.top = rect.top + "px";
+  highlightOverlay.style.left = rect.left + "px";
+  highlightOverlay.style.width = rect.width + "px";
+  highlightOverlay.style.height = rect.height + "px";
+  highlightOverlay.style.boxShadow = `0 0 0 9999px rgba(0,0,0,${dimAlpha})`;
+  highlightOverlay.style.outline = `2px solid ${outlineColor}`;
+  highlightOverlay.style.outlineOffset = "-1px";
+}
+
+function clearHighlight() {
+  if (highlightOverlay) {
+    highlightOverlay.remove();
+    highlightOverlay = null;
   }
 }
 
