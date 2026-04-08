@@ -1,24 +1,38 @@
-ext_dir := "extension"
+ext_firefox_dir := "firefox-extension"
+ext_chrome_dir := "extension-chrome"
 out_dir := "dist"
 
-# Package the extension into a zip for distribution
-build:
+[private]
+default:
+    just -l
+
+# Package the Firefox extension into a zip
+build-firefox:
     mkdir -p {{ out_dir }}
-    cd {{ ext_dir }} && zip -r ../{{ out_dir }}/openeyes.zip .
-    @echo "Built dist/openeyes.zip"
+    cd {{ ext_firefox_dir }} && zip -r ../{{ out_dir }}/openeyes-firefox.zip .
+    @echo "Built dist/openeyes-firefox.zip"
+
+# Package the Chrome extension into a zip
+build-chrome:
+    mkdir -p {{ out_dir }}
+    cd {{ ext_chrome_dir }} && zip -r ../{{ out_dir }}/openeyes-chrome.zip .
+    @echo "Built dist/openeyes-chrome.zip"
+
+# Package both extensions
+build-all: build-firefox build-chrome
 
 # Run the extension in Firefox for development (requires web-ext)
 run:
-    bunx web-ext run --source-dir {{ ext_dir }}
+    bunx web-ext run --source-dir {{ ext_firefox_dir }}
 
 # Lint the extension (requires web-ext)
 lint:
-    bunx web-ext lint --source-dir {{ ext_dir }}
+    bunx web-ext lint --source-dir {{ ext_firefox_dir }}
 
 # Build a signed/unsigned .xpi using web-ext (requires web-ext)
 xpi:
     mkdir -p {{ out_dir }}
-    bunx web-ext build --source-dir {{ ext_dir }} --artifacts-dir {{ out_dir }} --overwrite-dest
+    bunx web-ext build --source-dir {{ ext_firefox_dir }} --artifacts-dir {{ out_dir }} --overwrite-dest
 
 # Clean build output
 clean:
