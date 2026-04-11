@@ -2,6 +2,7 @@ ext_firefox_dir := "firefox-extension"
 ext_chrome_dir := "chrome-extension"
 out_dir := "dist"
 manifest_generator := "scripts/generate_manifests.py"
+bump_version_script := "scripts/bump_version.py"
 
 [private]
 default:
@@ -58,6 +59,23 @@ xpi:
     python3 {{ manifest_generator }}
     mkdir -p {{ out_dir }}
     bunx web-ext build --source-dir {{ ext_firefox_dir }} --artifacts-dir {{ out_dir }} --overwrite-dest
+
+# Bump shared manifest version (major, minor, patch)
+[group("build")]
+bump-version bump="patch":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    new_version="$(python3 {{ bump_version_script }} {{ bump }})"
+
+    if git rev-parse --verify --quiet "refs/tags/v${new_version}" >/dev/null; then
+      echo "Tag already exists: v${new_version}"
+      exit 1
+    fi
+
+    git add manifests/shared.json
+    git commit -m "chore: bump manifest version to ${new_version}"
+    git tag -a "v${new_version}" -m "v${new_version}"
+    echo "Bumped manifests/shared.json to ${new_version}, committed, and tagged v${new_version}"
 
 # Clean build output
 [group("build")]
