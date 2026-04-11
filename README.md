@@ -16,7 +16,8 @@ It's designed to bridge the gap between your browser and your development enviro
 
 ## Installation
 
-TBD
+[ Firefox ](https://addons.mozilla.org/en-US/firefox/addon/openeyes/)
+Chrome - TBD
 
 ### For Developers
 
