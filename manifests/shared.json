@@ -1,0 +1,5 @@
+{
+  "name": "OpenEyes",
+  "version": "0.2.1",
+  "description": "Select any page element and send it to a running OpenCode session."
+}
