@@ -1,23 +1,26 @@
 {
-  "manifest_version": 3,
   "name": "OpenEyes",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Select any page element and send it to a running OpenCode session.",
-
-  "permissions": ["activeTab", "tabs", "storage", "scripting"],
-  "host_permissions": ["<all_urls>"],
-
+  "manifest_version": 3,
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "background": {
     "service_worker": "background.js"
   },
-
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
-
   "action": {
     "default_icon": {
       "16": "icons/icon-16.png",
@@ -27,7 +30,6 @@
     "default_title": "OpenEyes",
     "default_popup": "popup.html"
   },
-
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
   }
