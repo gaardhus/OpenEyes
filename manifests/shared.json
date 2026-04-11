@@ -1,6 +1,6 @@
 {
   "name": "OpenEyes",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Select any page element and send it to a running OpenCode session.",
   "icons": {
     "16": "icons/icon.svg",
