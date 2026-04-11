@@ -1,8 +1,6 @@
 ext_firefox_dir := "firefox-extension"
 ext_chrome_dir := "chrome-extension"
 out_dir := "dist"
-manifest_generator := "scripts/generate_manifests.py"
-bump_version_script := "scripts/bump_version.py"
 
 [private]
 default:
@@ -25,7 +23,7 @@ build-chrome: manifests
 # Generate browser manifests from shared base
 [group("build")]
 manifests:
-    python3 {{ manifest_generator }}
+    python3 "scripts/generate_manifests.py"
     @echo "Manifests built"
 
 # Package both extensions
@@ -43,20 +41,18 @@ icons-chrome:
 
 # Run the extension in Firefox for development (requires web-ext)
 [group("Firefox")]
-dev:
-    python3 {{ manifest_generator }}
+dev: manifests
     bunx web-ext run --source-dir {{ ext_firefox_dir }}
 
 # Lint the extension (requires web-ext)
 [group("Firefox")]
-lint:
-    python3 {{ manifest_generator }}
+lint: manifests
     bunx web-ext lint --source-dir {{ ext_firefox_dir }}
 
 # Build a signed/unsigned .xpi using web-ext (requires web-ext)
 [group("Firefox")]
 xpi:
-    python3 {{ manifest_generator }}
+    just manifests
     mkdir -p {{ out_dir }}
     bunx web-ext build --source-dir {{ ext_firefox_dir }} --artifacts-dir {{ out_dir }} --overwrite-dest
 
@@ -65,7 +61,9 @@ xpi:
 bump-version bump="patch":
     #!/usr/bin/env bash
     set -euo pipefail
-    new_version="$(python3 {{ bump_version_script }} {{ bump }})"
+    # Update manifests
+    new_version="$(python3 scripts/bump_version.py {{ bump }})"
+    just manifests
 
     if git rev-parse --verify --quiet "refs/tags/v${new_version}" >/dev/null; then
       echo "Tag already exists: v${new_version}"
@@ -73,6 +71,8 @@ bump-version bump="patch":
     fi
 
     git add manifests/shared.json
+    git add "{{ ext_firefox_dir }}/manifest.json"
+    git add "{{ ext_chrome_dir }}/manifest.json"
     git commit -m "chore: bump manifest version to ${new_version}"
     git tag -a "v${new_version}" -m "v${new_version}"
     echo "Bumped manifests/shared.json to ${new_version}, committed, and tagged v${new_version}"
