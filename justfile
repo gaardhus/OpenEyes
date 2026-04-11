@@ -1,5 +1,5 @@
 ext_firefox_dir := "firefox-extension"
-ext_chrome_dir := "extension-chrome"
+ext_chrome_dir := "chrome-extension"
 out_dir := "dist"
 
 [private]
