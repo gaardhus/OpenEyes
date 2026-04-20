@@ -8,10 +8,12 @@ const DEFAULT_SERVER_URL = 'http://127.0.0.1:4096';
 
 async function getSettings() {
   const data = await browser.storage.local.get({
+    backend: 'opencode',
     serverUrl: DEFAULT_SERVER_URL,
     sessionId: 'auto',
     username: '',
     password: '',
+    token: '',
   });
   return data;
 }
@@ -58,7 +60,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === 'SEND_TO_OPENCODE') {
-    handleSendToOpenCode(message.payload).then(sendResponse);
+    handleSend(message.payload).then(sendResponse);
     return true;
   }
 
@@ -99,6 +101,12 @@ async function handleScreenshotCapture(message, sender) {
   }
 }
 
+async function handleSend(payload) {
+  const settings = await getSettings();
+  if (settings.backend === 'claudecode') return handleSendToClaudeCode(payload, settings);
+  return handleSendToOpenCode(payload);
+}
+
 async function handleSendToOpenCode(payload) {
   try {
     const sessionId = await resolveSessionId();
@@ -115,6 +123,37 @@ async function handleSendToOpenCode(payload) {
       return { ok: false, error: `OpenCode API: HTTP ${res.status} — ${text}` };
     }
 
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+async function handleSendToClaudeCode(payload, settings) {
+  try {
+    const base = (settings.serverUrl || 'http://127.0.0.1:4097').replace(/\/$/, '');
+    if (!settings.token) return { ok: false, error: 'Missing channel token' };
+
+    const res = await fetch(`${base}/ingest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-OpenEyes-Token': settings.token,
+      },
+      body: JSON.stringify({
+        instruction: payload.instruction,
+        html: payload.html,
+        url: payload.url,
+        title: payload.title,
+        cssSelector: payload.cssSelector,
+        screenshotBase64: payload.screenshotBase64 || null,
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      return { ok: false, error: `Channel: HTTP ${res.status} — ${text}` };
+    }
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err.message };

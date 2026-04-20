@@ -418,7 +418,11 @@ function showOverlay(el, info, screenshotBase64) {
     }
 
     sendBtn.disabled = true;
-    setStatus("sending", "Sending to OpenCode…");
+
+    const { backend } = await browser.storage.local.get({ backend: "opencode" });
+    const backendLabel = backend === "claudecode" ? "Claude Code" : "OpenCode";
+
+    setStatus("sending", `Sending to ${backendLabel}…`);
 
     const payload = {
       instruction,
@@ -436,7 +440,7 @@ function showOverlay(el, info, screenshotBase64) {
     });
 
     if (result?.ok) {
-      setStatus("success", "Sent to OpenCode!");
+      setStatus("success", `Sent to ${backendLabel}!`);
       setTimeout(() => {
         closeOverlay();
         clearSelection();

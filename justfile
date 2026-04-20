@@ -1,5 +1,6 @@
 ext_firefox_dir := "firefox-extension"
 ext_chrome_dir := "chrome-extension"
+channel_dir := "claude-code-plugin"
 out_dir := "dist"
 
 [private]
@@ -83,3 +84,18 @@ bump-version bump="patch":
 [group("build")]
 clean:
     rm -rf {{ out_dir }}
+
+# Install dependencies for the Claude Code channel server
+[group("Claude Code")]
+channel-install:
+    cd {{ channel_dir }} && bun install
+
+# Print the absolute path to add to .mcp.json / ~/.claude.json
+[group("Claude Code")]
+channel-mcp-config:
+    @printf '{\n  "mcpServers": {\n    "openeyes": {\n      "command": "bun",\n      "args": ["%s/server.ts"]\n    }\n  }\n}\n' "$(realpath {{ channel_dir }})"
+
+# Print the auth token the server generated on first run
+[group("Claude Code")]
+channel-token:
+    @cat "${HOME}/.claude/openeyes/token" 2>/dev/null || echo "No token yet — launch Claude Code once with the channel to generate it."

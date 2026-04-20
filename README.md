@@ -2,7 +2,7 @@
 
 <img src="firefox-extension/icons/icon.svg" alt="OpenEyes icon" width="96" />
 
-OpenEyes is a browser extension that allows you to select any element on a web page and send it—along with its HTML source and a cropped screenshot—directly to a running **OpenCode** session.
+OpenEyes is a browser extension that allows you to select any element on a web page and send it—along with its HTML source and a cropped screenshot—directly to a running **OpenCode** or **Claude Code** session.
 
 It's designed to bridge the gap between your browser and your development environment, making it easy to share UI components, bug reports, or layout snippets with your AI-assisted coding tools.
 
@@ -11,7 +11,7 @@ It's designed to bridge the gap between your browser and your development enviro
 - **Visual Element Picker:** Click any element on the page to select it.
 - **Contextual Capture:** Automatically captures the element's HTML, CSS selector, and page metadata.
 - **Smart Screenshots:** Captures a precise, cropped screenshot of the selected element.
-- **Direct Integration:** Sends captured data to the OpenCode API (defaults to `http://127.0.0.1:4096`).
+- **Direct Integration:** Sends captured data to the OpenCode API (defaults to `http://127.0.0.1:4096`) or to a running Claude Code session via a [channel](https://code.claude.com/docs/en/channels) (defaults to `http://127.0.0.1:4097`).
 - **Flexible Controls:** Toggle whether to include the source code or the screenshot before sending.
 
 ## Installation
@@ -93,9 +93,28 @@ The project includes a `justfile` for common tasks:
 - `just xpi`: Builds a signed or unsigned `.xpi` file for distribution.
 - `just clean`: Removes the `dist/` directory.
 
-## Other CLI tools
+## Claude Code
 
-Currently I did not succeed in finding relevant entry points in either Claude Code or Codex ([relevant issue](https://github.com/openai/codex/issues/15299)). Alternatively we could enable sending one-off messages.
+OpenEyes can also push into a running Claude Code session via a local
+[channel](https://code.claude.com/docs/en/channels) plugin that ships in this
+repo under [`claude-code-plugin/`](./claude-code-plugin).
+
+Setup:
+
+1. Install dependencies: `just channel-install` (or `cd claude-code-plugin && bun install`).
+2. Register the server with Claude Code. Print a ready-to-paste config with `just channel-mcp-config` and add it to a project-level `.mcp.json` or to `~/.claude.json`.
+3. Launch Claude Code with the channel enabled (research-preview flag required):
+   ```bash
+   claude --dangerously-load-development-channels server:openeyes
+   ```
+   The server binds to `127.0.0.1:4097` automatically — don't run it yourself.
+4. In the extension popup, set **Backend** to *Claude Code*, paste the token from `just channel-token` into **Channel token**, and send.
+
+Selected elements arrive in the session as a `<channel source="openeyes" ...>` event with the HTML, selector, and a `file_path` meta attribute pointing at the cropped screenshot.
+
+### Codex
+
+Not supported yet — see [openai/codex#15299](https://github.com/openai/codex/issues/15299).
 
 ## License
 

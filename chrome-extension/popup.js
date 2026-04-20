@@ -1,6 +1,9 @@
 'use strict';
 
-const DEFAULT_SERVER_URL = 'http://127.0.0.1:4096';
+const DEFAULTS = {
+  opencode: 'http://127.0.0.1:4096',
+  claudecode: 'http://127.0.0.1:4097',
+};
 
 const $ = (id) => document.getElementById(id);
 
@@ -8,18 +11,35 @@ const $ = (id) => document.getElementById(id);
 
 async function loadSettings() {
   const data = await chrome.storage.local.get({
-    serverUrl: DEFAULT_SERVER_URL,
+    backend: 'opencode',
+    serverUrl: DEFAULTS.opencode,
     sessionId: 'auto',
     password: '',
+    token: '',
   });
 
+  $('backend-select').value = data.backend;
   $('server-url').value = data.serverUrl;
   $('auth-password').value = data.password;
+  $('auth-token').value = data.token;
 
-  await refreshSessions(data);
+  applyBackendUI(data.backend);
+
+  if (data.backend === 'opencode') {
+    await refreshSessions(data);
+  } else {
+    await checkClaudeCodeHealth(data.serverUrl);
+  }
 }
 
-// ─── Health check ─────────────────────────────────────────────────────────────
+function applyBackendUI(backend) {
+  const isOpenCode = backend === 'opencode';
+  $('session-field').style.display = isOpenCode ? '' : 'none';
+  $('password-field').style.display = isOpenCode ? '' : 'none';
+  $('token-field').style.display = isOpenCode ? 'none' : '';
+}
+
+// ─── Health checks ────────────────────────────────────────────────────────────
 
 async function checkHealth(serverUrl, password) {
   const dot = $('status-dot');
@@ -48,7 +68,28 @@ async function checkHealth(serverUrl, password) {
   }
 }
 
-// ─── Sessions ─────────────────────────────────────────────────────────────────
+async function checkClaudeCodeHealth(serverUrl) {
+  const dot = $('status-dot');
+  const txt = $('status-text');
+
+  dot.className = 'status-dot loading';
+  txt.textContent = 'Connecting…';
+
+  try {
+    const res = await fetch(`${serverUrl.replace(/\/$/, '')}/health`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    dot.className = 'status-dot ok';
+    txt.textContent = `Channel ready${data.version ? ` · ${data.version}` : ''}`;
+    return true;
+  } catch (err) {
+    dot.className = 'status-dot error';
+    txt.textContent = `Offline — ${err.message}`;
+    return false;
+  }
+}
+
+// ─── Sessions (OpenCode only) ─────────────────────────────────────────────────
 
 async function refreshSessions(settings) {
   const serverUrl = (settings?.serverUrl ?? $('server-url').value).replace(/\/$/, '');
@@ -69,7 +110,6 @@ async function refreshSessions(settings) {
     sessions.sort((a, b) => (b.time?.updated ?? 0) - (a.time?.updated ?? 0));
 
     const sel = $('session-select');
-    // Keep the "auto" option, remove old session entries
     while (sel.options.length > 1) sel.remove(1);
 
     for (const s of sessions) {
@@ -80,7 +120,6 @@ async function refreshSessions(settings) {
       sel.appendChild(opt);
     }
 
-    // Restore saved selection
     if (savedId !== 'auto') {
       const match = [...sel.options].find(o => o.value === savedId);
       if (match) sel.value = savedId;
@@ -93,10 +132,13 @@ async function refreshSessions(settings) {
 // ─── Save settings ────────────────────────────────────────────────────────────
 
 async function saveSettings() {
+  const backend = $('backend-select').value;
   const settings = {
-    serverUrl: $('server-url').value.trim() || DEFAULT_SERVER_URL,
+    backend,
+    serverUrl: $('server-url').value.trim() || DEFAULTS[backend],
     sessionId: $('session-select').value,
     password:  $('auth-password').value,
+    token:     $('auth-token').value,
   };
 
   await chrome.storage.local.set(settings);
@@ -106,16 +148,28 @@ async function saveSettings() {
   setTimeout(() => { confirm.textContent = ''; }, 1500);
 }
 
+// ─── Backend switch ───────────────────────────────────────────────────────────
+
+function onBackendChange() {
+  const backend = $('backend-select').value;
+  applyBackendUI(backend);
+
+  // Swap default URL if current value matches the *other* default
+  const url = $('server-url').value.trim();
+  const other = backend === 'opencode' ? DEFAULTS.claudecode : DEFAULTS.opencode;
+  if (url === '' || url === other) $('server-url').value = DEFAULTS[backend];
+
+  if (backend === 'opencode') refreshSessions(null);
+  else checkClaudeCodeHealth($('server-url').value);
+}
+
 // ─── Pick element ─────────────────────────────────────────────────────────────
 
 async function pickElement() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab) return;
-
-  // Delegate to background so it can executeScript
   await chrome.runtime.sendMessage({ type: 'ACTIVATE_PICKER_IN_TAB', tabId: tab.id });
-
-  window.close(); // close popup so picker is visible
+  window.close();
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -134,6 +188,10 @@ function relativeTime(ms) {
 $('btn-pick').addEventListener('click', pickElement);
 $('btn-refresh').addEventListener('click', () => refreshSessions(null));
 $('btn-save').addEventListener('click', saveSettings);
-$('server-url').addEventListener('change', () => refreshSessions(null));
+$('backend-select').addEventListener('change', onBackendChange);
+$('server-url').addEventListener('change', () => {
+  if ($('backend-select').value === 'opencode') refreshSessions(null);
+  else checkClaudeCodeHealth($('server-url').value);
+});
 
 loadSettings();

@@ -171,11 +171,19 @@
 
   <div class="settings">
     <div class="field">
+      <label for="backend-select">Backend</label>
+      <select id="backend-select">
+        <option value="opencode">OpenCode</option>
+        <option value="claudecode">Claude Code (channel)</option>
+      </select>
+    </div>
+
+    <div class="field">
       <label for="server-url">Server URL</label>
       <input type="text" id="server-url" value="http://127.0.0.1:4096" spellcheck="false">
     </div>
 
-    <div class="field">
+    <div class="field" id="session-field">
       <label for="session-select">Session</label>
       <div class="session-row">
         <select id="session-select">
@@ -187,9 +195,13 @@
 
     <details id="auth-details">
       <summary>Auth</summary>
-      <div class="field">
+      <div class="field" id="password-field">
         <label for="auth-password">Password (OPENCODE_SERVER_PASSWORD)</label>
         <input type="password" id="auth-password" placeholder="Leave blank if unset">
+      </div>
+      <div class="field" id="token-field" style="display:none">
+        <label for="auth-token">Channel token (~/.claude/openeyes/token)</label>
+        <input type="password" id="auth-token" placeholder="Paste token from the channel server">
       </div>
     </details>
 
